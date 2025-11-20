@@ -19,12 +19,10 @@
     </div>
 
     <div id="emergencyLights"></div>
-    <div id="whiteOverlay"></div>
-
     <canvas id="scratchCanvas"></canvas>
 
     <div id="secret">
-        <img src="qrcode.jpg" alt="QR Code" id="qrCode">
+        <img src="qrcode.jpg" id="qrCode">
         <p class="final-note">
             Use a laptop or desktop for the best experience.<br>
             Mobile? → three dots → "Desktop site" → reload.
@@ -35,9 +33,12 @@
         </div>
     </div>
 
-    <audio id="bgMusic" loop><source src="backgroundmusic.mp3"><source src="backgroundmusic.m4a"></audio>
-    <audio id="typeSound" src="keyboard.mp3"></audio>
-    <audio id="siren" src="siren.mp3"></audio>
+    <audio id="bgMusic" loop preload="auto">
+        <source src="backgroundmusic.mp3" type="audio/mpeg">
+        <source src="backgroundmusic.m4a" type="audio/mp4">
+    </audio>
+    <audio id="typeSound" preload="auto" src="keyboard.mp3"></audio>
+    <audio id="siren" preload="auto" src="siren.mp3"></audio>
 
     <script src="script.js"></script>
 </body>
