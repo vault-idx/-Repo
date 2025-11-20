@@ -53,7 +53,7 @@
     <canvas id="scratchCanvas"></canvas>
 
     <div id="secret">
-        <img src="qrcode.png" id="qrCode">
+        <img src="qrcode.png" id="qrCode" style="display:none;">
         <p class="final-note">
             Use a laptop or desktop for the best experience.<br>
             Mobile? → three dots → "Desktop site" → reload.
@@ -81,17 +81,25 @@
         const lights = document.getElementById('emergencyLights');
         const canvas = document.getElementById('scratchCanvas');
         const secret = document.getElementById('secret');
+        const qrCode = document.getElementById('qrCode');
+        const copyBtn = document.getElementById('copyBtn');
 
         const bgMusic = document.getElementById('bgMusic');
         const typeSound = document.getElementById('typeSound');
         const siren = document.getElementById('siren');
 
         let attempts = 0;
+        let scratchReady = false;
+
+        // Fallback for audio load
+        bgMusic.addEventListener('error', () => console.log('Music load failed - continuing without sound'));
+        typeSound.addEventListener('error', () => console.log('Type sound load failed - continuing'));
+        siren.addEventListener('error', () => console.log('Siren load failed - continuing'));
 
         startBtn.onclick = () => {
             startBtn.remove();
             bgMusic.volume = 0.7;
-            bgMusic.play().catch(() => {});
+            bgMusic.play().catch(e => console.log('Music play failed:', e));
             typeWriter("Why are you here? Do you want to know what lies behind the darkness?", typewriter, 110, () => {
                 typeWriter("If yes then press red. If not then go for green.", subtext, 90, () => {
                     document.getElementById('buttons').style.opacity = 1;
@@ -118,7 +126,7 @@
             typewriter.style.opacity = subtext.style.opacity = trollNote.style.opacity = 0;
             lights.style.opacity = 1;
             siren.volume = 0.9;
-            siren.play().catch(() => {});
+            siren.play().catch(e => console.log('Siren play failed:', e));
 
             setTimeout(() => {
                 lights.style.opacity = 0;
@@ -139,12 +147,22 @@
                 canvas.style.opacity = 1;
                 canvas.style.pointerEvents = 'auto';
                 secret.style.opacity = 1;
+                qrCode.style.display = 'block';
                 ctx.globalCompositeOperation = 'destination-out';
+                scratchReady = true;
+            };
+            img.onerror = () => {
+                // Fallback without image - direct to secret
+                canvas.style.opacity = 1;
+                secret.style.opacity = 1;
+                qrCode.style.display = 'block';
+                scratchReady = true;
+                console.log('Scratch image failed - showing secret directly');
             };
         }
 
         canvas.onmousemove = canvas.ontouchmove = (e) => {
-            if (!canvas.style.opacity) return;
+            if (!scratchReady) return;
             const rect = canvas.getBoundingClientRect();
             const x = (e.clientX || e.touches[0].clientX) - rect.left;
             const y = (e.clientY || e.touches[0].clientY) - rect.top;
@@ -159,7 +177,7 @@
             el.innerHTML = '';
             let i = 0;
             typeSound.currentTime = 0;
-            typeSound.play().catch(() => {});
+            typeSound.play().catch(e => console.log('Type sound play failed:', e));
             const interval = setInterval(() => {
                 if (i < text.length) {
                     el.innerHTML += text.charAt(i);
@@ -172,13 +190,13 @@
             }, speed);
         }
 
-        document.getElementById('copyBtn').onclick = () => {
-            navigator.clipboard.writeText('20.11.2001');
-            document.getElementById('copyBtn').textContent = 'Copied!';
-            setTimeout(() => document.getElementById('copyBtn').textContent = 'Copy', 2000);
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText('20.11.2001').catch(e => alert('Copy failed: ' + e));
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => copyBtn.textContent = 'Copy', 2000);
         };
 
         window.addEventListener('resize', () => location.reload());
     </script>
 </body>
-  </html>
+</html>
